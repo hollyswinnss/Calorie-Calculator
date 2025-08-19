@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calorie Counter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            color: #222;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 32px 24px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 24px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            cursor: pointer;
+            font-weight: 500;
+            color: #888;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-bottom 0.2s;
+        }
+        .tab.active {
+            color: #0078d7;
+            border-bottom: 2px solid #0078d7;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .meal-group {
+            margin-bottom: 18px;
+        }
+        .meal-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .meal-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            margin-bottom: 4px;
+            box-sizing: border-box;
+        }
+        .result {
+            background: #e6f4ea;
+            color: #1b5e20;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 18px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .calc-btn {
+            background: #0078d7;
+            color: #fff;
+            border: none;
+            padding: 12px 0;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: background 0.2s;
+        }
+        .calc-btn:hover {
+            background: #005fa3;
+        }
+        .input-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 16px 6px; }
+            .input-row { flex-direction: column; gap: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="calorie-counter">Calorie Counter</div>
+            <div class="tab" data-tab="tdee">TDEE Calculator</div>
+            <div class="tab" data-tab="deficit">Calorie Deficit</div>
+        </div>
+
+        <!-- Calorie Counter Tab -->
+        <div class="tab-content active" id="calorie-counter">
+            <form id="calorieForm">
+                <div class="meal-group">
+                    <label class="meal-label" for="breakfast">Breakfast</label>
+                    <input class="meal-input" type="number" id="breakfast" min="0" placeholder="Calories for breakfast">
+                </div>
+                <div class="meal-group">
+                    <label class="meal-label" for="lunch">Lunch</label>
+                    <input class="meal-input" type="number" id="lunch" min="0" placeholder="Calories for lunch">
+                </div>
+                <div class="meal-group">
+                    <label class="meal-label" for="dinner">Dinner</label>
+                    <input class="meal-input" type="number" id="dinner" min="0" placeholder="Calories for dinner">
+                </div>
+                <div class="meal-group">
+                    <label class="meal-label" for="snacks">Snacks</label>
+                    <input class="meal-input" type="number" id="snacks" min="0" placeholder="Calories for snacks">
+                </div>
+                <button type="button" class="calc-btn" onclick="calculateCalories()">Calculate Total</button>
+            </form>
+            <div class="result" id="calorieResult" style="display:none;"></div>
+        </div>
+
+        <!-- TDEE Calculator Tab -->
+        <div class="tab-content" id="tdee">
+            <form id="tdeeForm">
+                <div class="input-row">
+                    <input type="number" id="age" min="10" max="100" placeholder="Age (years)" required>
+                    <select id="gender" required>
+                        <option value="">Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div class="input-row">
+                    <input type="number" id="height" min="100" max="250" placeholder="Height (cm)" required>
+                    <input type="number" id="weight" min="30" max="250" placeholder="Weight (kg)" required>
+                </div>
+                <div class="input-row">
+                    <select id="activity" required>
+                        <option value="">Activity Level</option>
+                        <option value="1.2">Sedentary</option>
+                        <option value="1.375">Lightly active</option>
+                        <option value="1.55">Moderately active</option>
+                        <option value="1.725">Very active</option>
+                        <option value="1.9">Extra active</option>
+                    </select>
+                </div>
+                <button type="button" class="calc-btn" onclick="calculateTDEE()">Calculate TDEE</button>
+            </form>
+            <div class="result" id="tdeeResult" style="display:none;"></div>
+        </div>
+
+        <!-- Calorie Deficit Calculator Tab -->
+        <div class="tab-content" id="deficit">
+            <form id="deficitForm">
+                <div class="input-row">
+                    <input type="number" id="currentWeight" min="30" max="250" placeholder="Current Weight (kg)" required>
+                    <input type="number" id="targetWeight" min="30" max="250" placeholder="Target Weight (kg)" required>
+                </div>
+                <div class="input-row">
+                    <input type="number" id="weeks" min="1" max="52" placeholder="Weeks to goal" required>
+                </div>
+                <div class="input-row">
+                    <input type="number" id="tdeeInput" min="800" max="6000" placeholder="Your TDEE (kcal)" required>
+                </div>
+                <button type="button" class="calc-btn" onclick="calculateDeficit()">Calculate Deficit</button>
+            </form>
+            <div class="result" id="deficitResult" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(this.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Calorie Counter
+        function calculateCalories() {
+            const breakfast = parseInt(document.getElementById('breakfast').value) || 0;
+            const lunch = parseInt(document.getElementById('lunch').value) || 0;
+            const dinner = parseInt(document.getElementById('dinner').value) || 0;
+            const snacks = parseInt(document.getElementById('snacks').value) || 0;
+            const total = breakfast + lunch + dinner + snacks;
+            const resultDiv = document.getElementById('calorieResult');
+            resultDiv.textContent = `Total Calories: ${total} kcal`;
+            resultDiv.style.display = 'block';
+        }
+
+        // TDEE Calculator
+        function calculateTDEE() {
+            const age = parseInt(document.getElementById('age').value);
+            const gender = document.getElementById('gender').value;
+            const height = parseInt(document.getElementById('height').value);
+            const weight = parseInt(document.getElementById('weight').value);
+            const activity = parseFloat(document.getElementById('activity').value);
+
+            if (!age || !gender || !height || !weight || !activity) return;
+
+            let bmr;
+            if (gender === 'male') {
+                bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+            const tdee = Math.round(bmr * activity);
+            const resultDiv = document.getElementById('tdeeResult');
+            resultDiv.textContent = `Your TDEE is approximately ${tdee} kcal/day`;
+            resultDiv.style.display = 'block';
+        }
+
+        // Calorie Deficit Calculator
+        function calculateDeficit() {
+            const currentWeight = parseFloat(document.getElementById('currentWeight').value);
+            const targetWeight = parseFloat(document.getElementById('targetWeight').value);
+            const weeks = parseInt(document.getElementById('weeks').value);
+            const tdee = parseInt(document.getElementById('tdeeInput').value);
+
+            if (!currentWeight || !targetWeight || !weeks || !tdee) return;
+
+            const weightLoss = currentWeight - targetWeight;
+            if (weightLoss <= 0) {
+                document.getElementById('deficitResult').textContent = "Target weight must be less than current weight.";
+                document.getElementById('deficitResult').style.display = 'block';
+                return;
+            }
+            const totalCaloriesToLose = weightLoss * 7700; // 1kg fat ≈ 7700 kcal
+            const dailyDeficit = Math.round(totalCaloriesToLose / (weeks * 7));
+            const recommendedIntake = tdee - dailyDeficit;
+
+            let msg = `To lose ${weightLoss.toFixed(1)} kg in ${weeks} week(s), aim for a daily deficit of ${dailyDeficit} kcal.`;
+            if (recommendedIntake < 1200) {
+                msg += " Warning: This is below the recommended minimum intake (1200 kcal/day).";
+            } else {
+                msg += `\nRecommended daily intake: ${recommendedIntake} kcal.`;
+            }
+            document.getElementById('deficitResult').textContent = msg;
+            document.getElementById('deficitResult').style.display = 'block';
+        }
+    </script>
+</body>
+</html></div>
